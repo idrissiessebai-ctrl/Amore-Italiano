@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
 import SectionHeader from "@/components/SectionHeader";
-import SafiGallerySection from "@/components/public/SafiGallerySection";
-import { supabase } from "@/lib/supabase";
 
 export function Stats() {
   return (
@@ -66,35 +64,6 @@ export function Highlights() {
         </div>
       </div>
     </section>
-  );
-}
-
-export async function SafiSection() {
-  const { data } = await supabase
-    .from("restaurant_settings")
-    .select("key, value")
-    .in("key", ["safi_title", "safi_description", "safi_button_text", "safi_button_link", "safi_images"]);
-  const settings = data ?? [];
-
-  function value(key: string, fallback = "") {
-    const setting = settings.find((item) => item.key === key);
-    if (!setting?.value || typeof setting.value !== "object" || !("value" in setting.value)) return fallback;
-    return typeof setting.value.value === "string" ? setting.value.value : fallback;
-  }
-
-  const imageSetting = settings.find((item) => item.key === "safi_images");
-  const images = imageSetting?.value && typeof imageSetting.value === "object" && "value" in imageSetting.value && Array.isArray(imageSetting.value.value)
-    ? imageSetting.value.value.filter((image: unknown): image is string => typeof image === "string")
-    : [];
-
-  return (
-    <SafiGallerySection
-      title={value("safi_title", "Une ville authentique.")}
-      description={value("safi_description", "Safi possède une identité particulière, entre médina, remparts, ateliers de potiers et océan Atlantique.")}
-      buttonText={value("safi_button_text", "DÉCOUVRIR L'HISTOIRE DE SAFI")}
-      buttonLink={value("safi_button_link", "/safi")}
-      images={images}
-    />
   );
 }
 
