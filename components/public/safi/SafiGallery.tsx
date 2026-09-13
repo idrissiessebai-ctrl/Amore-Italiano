@@ -1,37 +1,20 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import type { SafiContent } from "@/lib/safi";
 
 export default function SafiGallery({ content }: { content: SafiContent["gallery"] }) {
   const photos = content.images;
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [isImageVisible, setIsImageVisible] = useState(false);
-  const closeTimer = useRef<number | null>(null);
   const selectedPhoto = selectedIndex === null ? null : photos[selectedIndex];
-
-  const openLightbox = (index: number) => {
-    if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
-    setIsImageVisible(false);
-    setSelectedIndex(index);
-  };
-
-  const closeLightbox = () => {
-    setIsImageVisible(false);
-    closeTimer.current = window.setTimeout(() => {
-      setSelectedIndex(null);
-      closeTimer.current = null;
-    }, 220);
-  };
 
   useEffect(() => {
     if (selectedIndex === null) return;
 
-    const frame = window.requestAnimationFrame(() => setIsImageVisible(true));
-
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeLightbox();
+      if (event.key === "Escape") setSelectedIndex(null);
       if (event.key === "ArrowRight") {
         setSelectedIndex((current) => (current === null ? 0 : (current + 1) % photos.length));
       }
@@ -43,15 +26,10 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
     document.addEventListener("keydown", handleKeyDown);
     document.body.style.overflow = "hidden";
     return () => {
-      window.cancelAnimationFrame(frame);
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
   }, [selectedIndex, photos.length]);
-
-  useEffect(() => () => {
-    if (closeTimer.current !== null) window.clearTimeout(closeTimer.current);
-  }, []);
 
   return (
     <section className="bg-[#f7f2e8] py-24">
@@ -71,7 +49,7 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
             <button
               key={photo.url}
               type="button"
-              onClick={() => openLightbox(index)}
+              onClick={() => setSelectedIndex(index)}
               className={`group relative min-h-[260px] overflow-hidden rounded-sm bg-[#e8e1d4] text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#a92e27] focus-visible:ring-offset-4 ${index === 0 ? "lg:row-span-2" : ""}`}
               aria-label={`Agrandir : ${photo.alt}`}
             >
@@ -93,20 +71,30 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
         <p className="mt-7 text-[11px] leading-5 text-[#6e6a61]">Les images de cette galerie sont gérées depuis le tableau de bord administrateur.</p>
       </div>
 
-      {selectedPhoto && selectedIndex !== null && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 p-4 backdrop-blur-md transition-opacity duration-[220ms]"
-          role="presentation"
-          onClick={(event) => {
-            if (event.target === event.currentTarget) closeLightbox();
-          }}
-        >
-          <div
+      <AnimatePresence>
+        {selectedPhoto && selectedIndex !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-md"
+            role="presentation"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) setSelectedIndex(null);
+            }}
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={selectedPhoto.url}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
             role="dialog"
             aria-modal="true"
             aria-label={selectedPhoto.alt}
-            className={`relative flex h-[85vh] w-[90vw] max-h-[85vh] max-w-[90vw] items-center justify-center transition-[opacity,transform] duration-[220ms] ease-out ${isImageVisible ? "scale-100 opacity-100" : "scale-[.95] opacity-0"}`}
-          >
+                className="relative flex h-[85vh] w-[90vw] max-h-[85vh] max-w-[90vw] items-center justify-center"
+              >
             <Image
               src={selectedPhoto.url}
               alt={selectedPhoto.alt}
@@ -119,7 +107,7 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
             </p>
             <button
               type="button"
-              onClick={closeLightbox}
+              onClick={() => setSelectedIndex(null)}
               className="absolute right-0 top-0 rounded-full bg-white/90 px-4 py-2 text-2xl leading-none text-[#171717] transition hover:bg-white"
               aria-label="Fermer la galerie"
             >
@@ -128,7 +116,6 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
             <button
               type="button"
               onClick={() => {
-                setIsImageVisible(false);
                 setSelectedIndex((selectedIndex - 1 + photos.length) % photos.length);
               }}
               className="absolute left-2 top-1/2 rounded-full bg-white/90 px-4 py-2 text-2xl text-[#171717] transition hover:bg-white sm:-left-14"
@@ -139,7 +126,6 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
             <button
               type="button"
               onClick={() => {
-                setIsImageVisible(false);
                 setSelectedIndex((selectedIndex + 1) % photos.length);
               }}
               className="absolute right-2 top-1/2 rounded-full bg-white/90 px-4 py-2 text-2xl text-[#171717] transition hover:bg-white sm:-right-14"
@@ -147,9 +133,11 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
             >
               ›
             </button>
-          </div>
-        </div>
-      )}
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
