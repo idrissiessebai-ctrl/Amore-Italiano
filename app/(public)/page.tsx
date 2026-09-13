@@ -1,11 +1,11 @@
 import Gallery from "@/components/Gallery";
 import PublicMenu from "@/components/PublicMenu";
+import { SafiSection } from "@/components/SafiSection";
 import { Story, Location } from "@/components/ContentSections";
 import Hero from "@/components/public/Hero";
 import {
   ContactSection,
   Highlights,
-  SafiSection,
   Stats,
 } from "@/components/public/PublicSections";
 import SectionHeader from "@/components/SectionHeader";
