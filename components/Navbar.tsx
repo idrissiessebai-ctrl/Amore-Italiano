@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const links = [
@@ -11,8 +12,10 @@ const links = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const sectionHref = (href: string) => (href.startsWith("#") && pathname !== "/" ? `/${href}` : href);
 
   useEffect(() => {
     const hero = document.getElementById("hero");
@@ -38,7 +41,7 @@ export default function Navbar() {
           : "border-transparent bg-transparent text-white"
       }`}
     >
-      <a href="#hero" className="shrink-0" onClick={() => setOpen(false)}>
+      <a href={sectionHref("#hero")} className="shrink-0" onClick={() => setOpen(false)}>
         <Image
           src="/images/amore-33-png.webp"
           alt="Amore Italiano Safi"
@@ -55,7 +58,7 @@ export default function Navbar() {
         {links.map(([label, href]) => (
           <a
             key={href}
-            href={href}
+            href={sectionHref(href)}
             onClick={() => setOpen(false)}
             className={`transition-colors hover:text-[#a92e27] ${scrolled ? "text-[#171717]" : "text-white drop-shadow-[0_2px_10px_rgba(0,0,0,.35)]"}`}
           >
