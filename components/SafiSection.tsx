@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { getSafiContent } from "@/lib/safi-server";
 
 const cardStyles = ["-rotate-3", "rotate-3", "-rotate-2", "rotate-2"];
 const cardLabels = ["Le port", "La médina", "La poterie", "L'Atlantique"];
@@ -23,10 +24,13 @@ function publicSafiImageUrl(image: string) {
 }
 
 export async function SafiSection() {
-  const { data } = await supabase
-    .from("restaurant_settings")
-    .select("key, value")
-    .in("key", ["safi_title", "safi_description", "safi_button_text", "safi_button_link", "safi_images"]);
+  const [{ data }, safiContent] = await Promise.all([
+    supabase
+      .from("restaurant_settings")
+      .select("key, value")
+      .in("key", ["safi_title", "safi_description", "safi_button_text", "safi_button_link"]),
+    getSafiContent(),
+  ]);
   const settings = data ?? [];
 
   function value(key: string, fallback = "") {
@@ -35,10 +39,7 @@ export async function SafiSection() {
     return typeof setting.value.value === "string" ? setting.value.value : fallback;
   }
 
-  const imageSetting = settings.find((item) => item.key === "safi_images");
-  const configuredImages = imageSetting?.value && typeof imageSetting.value === "object" && "value" in imageSetting.value && Array.isArray(imageSetting.value.value)
-    ? imageSetting.value.value.filter((image: unknown): image is string => typeof image === "string" && image.trim().length > 0)
-    : [];
+  const configuredImages = safiContent.gallery.images.map((image) => image.url);
   const images = Array.from({ length: 4 }, (_, index) => publicSafiImageUrl(configuredImages[index] || fallbackImages[index]));
   const title = value("safi_title", "Une ville authentique.");
   const description = value("safi_description", "Safi possède une identité particulière, entre médina, remparts, ateliers de potiers et océan Atlantique.");
@@ -72,7 +73,7 @@ export async function SafiSection() {
                 <p className="mb-3 text-[10px] font-bold uppercase tracking-[.18em] text-white/75">{cardLabels[index]}</p>
                 <Link
                   href={buttonLink || "/safi"}
-                  className="inline-flex items-center rounded-full bg-white/95 px-4 py-2 text-[11px] font-bold uppercase tracking-[.08em] text-[#171717] transition hover:bg-white"
+                  className="inline-flex items-center rounded-full bg-[#a92e27] px-4 py-2 text-[11px] font-bold uppercase tracking-[.08em] !text-white transition hover:bg-[#86221e]"
                 >
                   {buttonText}
                 </Link>
