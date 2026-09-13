@@ -77,12 +77,40 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-md"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 backdrop-blur-md"
             role="presentation"
             onClick={(event) => {
               if (event.target === event.currentTarget) setSelectedIndex(null);
             }}
           >
+            <button
+              type="button"
+              onClick={() => setSelectedIndex(null)}
+              className="absolute right-6 top-6 z-[110] cursor-pointer rounded-full bg-white/10 p-3 text-white transition-all hover:bg-white/20 backdrop-blur-sm"
+              aria-label="Fermer la galerie"
+            >
+              <span className="flex h-6 w-6 items-center justify-center text-2xl leading-none">×</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedIndex((selectedIndex - 1 + photos.length) % photos.length);
+              }}
+              className="absolute left-4 top-1/2 z-[110] -translate-y-1/2 cursor-pointer rounded-full bg-white/10 p-3 text-white transition-all hover:bg-white/20 backdrop-blur-sm"
+              aria-label="Image précédente"
+            >
+              <span className="flex h-6 w-6 items-center justify-center text-3xl leading-none">‹</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedIndex((selectedIndex + 1) % photos.length);
+              }}
+              className="absolute right-4 top-1/2 z-[110] -translate-y-1/2 cursor-pointer rounded-full bg-white/10 p-3 text-white transition-all hover:bg-white/20 backdrop-blur-sm"
+              aria-label="Image suivante"
+            >
+              <span className="flex h-6 w-6 items-center justify-center text-3xl leading-none">›</span>
+            </button>
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={selectedPhoto.url}
@@ -105,34 +133,6 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
             <p className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-2 text-center text-sm text-white">
               {selectedPhoto.caption}
             </p>
-            <button
-              type="button"
-              onClick={() => setSelectedIndex(null)}
-              className="absolute right-0 top-0 rounded-full bg-white/90 px-4 py-2 text-2xl leading-none text-[#171717] transition hover:bg-white"
-              aria-label="Fermer la galerie"
-            >
-              ×
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedIndex((selectedIndex - 1 + photos.length) % photos.length);
-              }}
-              className="absolute left-2 top-1/2 rounded-full bg-white/90 px-4 py-2 text-2xl text-[#171717] transition hover:bg-white sm:-left-14"
-              aria-label="Image précédente"
-            >
-              ‹
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedIndex((selectedIndex + 1) % photos.length);
-              }}
-              className="absolute right-2 top-1/2 rounded-full bg-white/90 px-4 py-2 text-2xl text-[#171717] transition hover:bg-white sm:-right-14"
-              aria-label="Image suivante"
-            >
-              ›
-            </button>
               </motion.div>
             </AnimatePresence>
           </motion.div>
