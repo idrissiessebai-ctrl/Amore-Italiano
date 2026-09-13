@@ -15,7 +15,24 @@ export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [visible, setVisible] = useState(false);
   const sectionHref = (href: string) => (href.startsWith("#") && pathname !== "/" ? `/${href}` : href);
+
+  useEffect(() => {
+    if (pathname !== "/") {
+      setVisible(true);
+      return;
+    }
+
+    const updateVisibility = () => {
+      const scrollThreshold = window.innerHeight * 0.8;
+      setVisible(window.scrollY > scrollThreshold);
+    };
+
+    updateVisibility();
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    return () => window.removeEventListener("scroll", updateVisibility);
+  }, [pathname]);
 
   useEffect(() => {
     const hero = document.getElementById("hero");
@@ -35,7 +52,11 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 z-50 flex w-full items-center gap-3 border-b px-[3%] py-3 transition-[background-color,backdrop-filter,border-color,box-shadow] duration-300 md:gap-7 md:px-[4%] ${
+      className={`fixed left-0 top-0 z-50 flex w-full items-center gap-3 border-b px-[3%] py-3 transition-all duration-300 md:gap-7 md:px-[4%] ${
+        pathname === "/" && !visible
+          ? "pointer-events-none -translate-y-full opacity-0"
+          : "pointer-events-auto translate-y-0 opacity-100"
+      } ${
         scrolled
           ? "border-black/5 bg-amber-50/90 text-[#171717] shadow-[0_4px_18px_rgba(0,0,0,.05)] backdrop-blur-md"
           : "border-transparent bg-transparent text-white"
