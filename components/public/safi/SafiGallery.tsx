@@ -3,7 +3,9 @@
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { SafiContent } from "@/lib/safi";
+import { getPublicImageUrl } from "@/lib/utils/image";
 
 export default function SafiGallery({ content }: { content: SafiContent["gallery"] }) {
   const photos = content.images;
@@ -32,7 +34,8 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
   }, [selectedIndex, photos.length]);
 
   return (
-    <section className="bg-[#f7f2e8] py-24">
+    <>
+      <section className="bg-[#f7f2e8] py-24">
       <div className="mx-auto w-[92%] max-w-[1180px]">
         <div className="mb-14 max-w-[780px]">
           <div className="mb-5 text-xs font-bold uppercase tracking-[.18em] text-[#a92e27]">
@@ -54,7 +57,7 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
               aria-label={`Agrandir : ${photo.alt}`}
             >
               <Image
-                src={photo.url}
+                src={getPublicImageUrl(photo.url)}
                 alt={photo.alt}
                 fill
                 sizes="(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 40vw"
@@ -71,9 +74,12 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
         <p className="mt-7 text-[11px] leading-5 text-[#6e6a61]">Les images de cette galerie sont gérées depuis le tableau de bord administrateur.</p>
       </div>
 
-      <AnimatePresence>
-        {selectedPhoto && selectedIndex !== null && (
-          <motion.div
+      </section>
+
+      {selectedPhoto && selectedIndex !== null && typeof document !== "undefined"
+        ? createPortal(
+            <AnimatePresence>
+              <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -124,7 +130,7 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
                 className="relative flex h-[85vh] w-[90vw] max-h-[85vh] max-w-[90vw] items-center justify-center"
               >
             <Image
-              src={selectedPhoto.url}
+              src={getPublicImageUrl(selectedPhoto.url)}
               alt={selectedPhoto.alt}
               fill
               sizes="100vw"
@@ -135,9 +141,11 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
             </p>
               </motion.div>
             </AnimatePresence>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
+              </motion.div>
+            </AnimatePresence>,
+            document.body,
+          )
+        : null}
+    </>
   );
 }

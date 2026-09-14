@@ -1,3 +1,5 @@
+import { getPublicImageUrl } from "@/lib/utils/image";
+
 export type SafiTimelineItem = {
   year: string;
   title: string;
@@ -54,7 +56,7 @@ export const defaultSafiContent: SafiContent = {
     eyebrow: "Ciao, Safi · Maroc",
     title: "L'histoire de Safi.",
     description: "Une ville tournée vers l'Atlantique, façonnée par son port, sa médina, ses remparts et son savoir-faire ancestral de la poterie.",
-    image: "/images/amore-32-jpg.webp",
+    image: getPublicImageUrl("/images/amore-32-jpg.webp"),
     alt: "Architecture et patrimoine de Safi",
   },
   history: {
