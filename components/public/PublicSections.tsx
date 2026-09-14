@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
 import SectionHeader from "@/components/SectionHeader";
+import { getPublicImageUrl } from "@/lib/utils/image";
 
 export function Stats() {
   return (
@@ -48,7 +49,7 @@ export function Highlights() {
           {cards.map(([image, title, description]) => (
             <Reveal key={title} className="overflow-hidden rounded-xl bg-[#eee8dc]">
               <Image
-                src={`/images/${image}`}
+                src={getPublicImageUrl(`/images/${image}`)}
                 alt={title}
                 width={1367}
                 height={2048}

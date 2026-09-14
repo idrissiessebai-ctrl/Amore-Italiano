@@ -1,12 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getPublicImageUrl } from "@/lib/utils/image";
 export default function Footer() {
   return (
     <footer className="bg-[#171717] py-15 text-white">
       <div className="mx-auto flex w-[92%] max-w-[1180px] flex-col justify-between gap-7 md:flex-row">
         <div>
           <Image
-            src="/images/amore-33-png.webp"
+            src={getPublicImageUrl("/images/amore-33-png.webp")}
             alt="Amore Italiano Safi"
             width={940}
             height={327}

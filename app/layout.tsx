@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { DM_Sans, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { getPublicImageUrl } from "@/lib/utils/image";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -28,10 +29,10 @@ export const metadata: Metadata = {
     title: "Amore Italiano — Safi",
     description: "Pizza, café, gelato et cuisine italienne depuis 2013 à Safi.",
     type: "website",
-    images: ["/images/amore-21-png.webp"],
+    images: [getPublicImageUrl("/images/amore-21-png.webp")],
   },
   alternates: { canonical: "/" },
-  icons: { icon: "/images/amore-33-png.webp" },
+  icons: { icon: getPublicImageUrl("/images/amore-33-png.webp") },
 };
 
 export default function RootLayout({
