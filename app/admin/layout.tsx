@@ -3,6 +3,7 @@ import Image from "next/image";
 import { SignOutButton, UserButton } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import { assertAdmin } from "@/lib/auth";
+import { getPublicImageUrl } from "@/lib/utils/image";
 
 export default async function AdminLayout({
   children,
@@ -14,7 +15,7 @@ export default async function AdminLayout({
       <header className="mx-auto flex w-[92%] max-w-[1180px] items-center justify-between border-b border-[#ded8cc] py-4">
         <Link href="/admin/dashboard" className="flex items-center gap-4">
           <Image
-            src="/images/amore-33-png.webp"
+            src={getPublicImageUrl("/images/amore-33-png.webp")}
             alt="Amore Italiano Safi"
             width={940}
             height={327}

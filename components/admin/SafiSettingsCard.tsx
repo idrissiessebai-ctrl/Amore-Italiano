@@ -4,6 +4,7 @@ import { Trash2, Upload, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { getPublicImageUrl } from "@/lib/utils/image";
 import {
   deleteSafiImage,
   updateSafiSettings,
@@ -79,7 +80,7 @@ export default function SafiSettingsCard({
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    formData.set("safi_images", JSON.stringify(images));
+    formData.set("safi_images", JSON.stringify(images.map(getPublicImageUrl)));
 
     startSaving(async () => {
       try {
@@ -113,7 +114,7 @@ export default function SafiSettingsCard({
           </div>
           <div className="grid overflow-hidden rounded-xl bg-white shadow-sm md:grid-cols-2">
             <div className="relative min-h-64 bg-[#e8e1d4] md:min-h-80">
-              <img src={images[0] || fallbackImage} alt="Aperçu de la galerie Safi" className="absolute inset-0 h-full w-full object-cover" />
+              <img src={getPublicImageUrl(images[0] || fallbackImage)} alt="Aperçu de la galerie Safi" className="absolute inset-0 h-full w-full object-cover" />
               {images.length > 1 && <span className="absolute bottom-3 right-3 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-bold text-white">+{images.length - 1} photos</span>}
             </div>
             <div className="p-6 sm:p-8">
@@ -172,7 +173,7 @@ export default function SafiSettingsCard({
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {images.map((url) => (
               <div key={url} className="group relative overflow-hidden rounded-lg border border-[#ded8cc] bg-[#f7f2e8]">
-                <img src={url} alt="Photo de Safi" className="aspect-[4/3] w-full object-cover" />
+                <img src={getPublicImageUrl(url)} alt="Photo de Safi" className="aspect-[4/3] w-full object-cover" />
                 <button
                   type="button"
                   aria-label="Supprimer cette photo"

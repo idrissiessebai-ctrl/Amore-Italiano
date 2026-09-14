@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { getPublicImageUrl } from "@/lib/utils/image";
 
 const links = [
   ["Histoire", "#histoire"],
@@ -64,7 +65,7 @@ export default function Navbar() {
     >
       <a href={sectionHref("#hero")} className="shrink-0" onClick={() => setOpen(false)}>
         <Image
-          src="/images/amore-33-png.webp"
+          src={getPublicImageUrl("/images/amore-33-png.webp")}
           alt="Amore Italiano Safi"
           width={940}
           height={327}

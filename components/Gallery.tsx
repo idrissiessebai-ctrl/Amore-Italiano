@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
+import { getPublicImageUrl } from "@/lib/utils/image";
 const images = [
   ["amore-11-png.webp", 1086, 1448], ["amore-13-jpg.webp", 1367, 2048],
   ["amore-15-jpg.webp", 2048, 1367], ["amore-17-jpg.webp", 2048, 1367],
@@ -17,13 +18,13 @@ export default function Gallery() {
       {images.map(([image, width, height], i) => (
         <a
           key={image}
-          href={`/images/${image}`}
+          href={getPublicImageUrl(`/images/${image}`)}
             target="_blank"
             rel="noreferrer"
             className={`${i > 5 && !expanded ? "hidden" : ""} group relative h-[300px] overflow-hidden rounded-[14px] bg-[#e8e1d5] lg:h-auto ${i === 0 ? "lg:row-span-2" : ""} ${i === 3 ? "lg:col-span-2" : ""}`}
           >
           <Image
-            src={`/images/${image}`}
+            src={getPublicImageUrl(`/images/${image}`)}
             alt="Création Amore Italiano"
             width={width}
             height={height}

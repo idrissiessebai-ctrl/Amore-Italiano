@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
+import { getPublicImageUrl } from "@/lib/utils/image";
 
 type SafiGallerySectionProps = {
   title: string;
@@ -16,7 +17,7 @@ type SafiGallerySectionProps = {
 const fallbackImage = "/images/amore-32-jpg.webp";
 
 export default function SafiGallerySection({ title, description, buttonText, buttonLink, images }: SafiGallerySectionProps) {
-  const slides = images.length ? images : [fallbackImage];
+  const slides = (images.length ? images : [fallbackImage]).map(getPublicImageUrl);
   const [activeIndex, setActiveIndex] = useState(0);
 
   function move(direction: 1 | -1) {

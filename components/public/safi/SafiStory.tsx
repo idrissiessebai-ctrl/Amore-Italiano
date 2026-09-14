@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import SafiGallery from "@/components/public/safi/SafiGallery";
 import { getSafiContent } from "@/lib/safi-server";
+import { getPublicImageUrl } from "@/lib/utils/image";
 
 function StorySection({
   eyebrow,
@@ -65,7 +66,7 @@ export default async function SafiStory() {
           </div>
           <div className="relative aspect-[4/5] overflow-hidden rounded-sm bg-[#e8e1d4] shadow-[0_20px_50px_rgba(0,0,0,.12)]">
             <Image
-              src={content.hero.image}
+              src={getPublicImageUrl(content.hero.image)}
               alt={content.hero.alt}
               fill
               priority

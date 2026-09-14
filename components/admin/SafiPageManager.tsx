@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { deleteSafiImage, updateSafiPageContent, uploadSafiImage } from "@/app/actions/cms";
 import type { SafiContent, SafiFact, SafiGalleryImage, SafiTimelineItem } from "@/lib/safi";
+import { getPublicImageUrl } from "@/lib/utils/image";
 
 export default function SafiPageManager({ initialContent }: { initialContent: SafiContent }) {
   const router = useRouter();
@@ -106,7 +107,7 @@ export default function SafiPageManager({ initialContent }: { initialContent: Sa
     formData.set("safi_hero_eyebrow", content.hero.eyebrow);
     formData.set("safi_hero_title", content.hero.title);
     formData.set("safi_hero_description", content.hero.description);
-    formData.set("safi_hero_image", content.hero.image);
+    formData.set("safi_hero_image", getPublicImageUrl(content.hero.image));
     formData.set("safi_hero_image_alt", content.hero.alt);
     formData.set("safi_history_eyebrow", content.history.eyebrow);
     formData.set("safi_history_title", content.history.title);
@@ -123,7 +124,10 @@ export default function SafiPageManager({ initialContent }: { initialContent: Sa
     formData.set("safi_gallery_eyebrow", content.gallery.eyebrow);
     formData.set("safi_gallery_title", content.gallery.title);
     formData.set("safi_gallery_description", content.gallery.description);
-    formData.set("safi_gallery_images", JSON.stringify(content.gallery.images));
+    formData.set(
+      "safi_gallery_images",
+      JSON.stringify(content.gallery.images.map((image) => ({ ...image, url: getPublicImageUrl(image.url) }))),
+    );
 
     startSaving(async () => {
       try {
@@ -163,7 +167,7 @@ export default function SafiPageManager({ initialContent }: { initialContent: Sa
         <SectionTitle eyebrow="01 · Introduction" title="En-tête de la page" description="Le premier écran visible à l'arrivée sur /safi." />
         <div className="mt-6 grid gap-6 lg:grid-cols-[.8fr_1.2fr]">
           <div className="relative min-h-64 overflow-hidden rounded-xl bg-[#e8e1d4]">
-            <img src={content.hero.image || "/images/amore-32-jpg.webp"} alt="Aperçu de l'en-tête Safi" className="absolute inset-0 h-full w-full object-cover" />
+            <img src={getPublicImageUrl(content.hero.image || "/images/amore-32-jpg.webp")} alt="Aperçu de l'en-tête Safi" className="absolute inset-0 h-full w-full object-cover" />
             <label className="absolute bottom-3 left-3 inline-flex cursor-pointer items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-bold text-[#171717] shadow">
               {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
               Remplacer l&apos;image
@@ -216,7 +220,7 @@ export default function SafiPageManager({ initialContent }: { initialContent: Sa
         <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {content.gallery.images.map((image, index) => (
             <div key={`${image.url}-${index}`} className="overflow-hidden rounded-xl border border-[#ded8cc] bg-[#fffdf8]">
-              <div className="relative aspect-[4/3] bg-[#e8e1d4]"><img src={image.url} alt={image.alt} className="h-full w-full object-cover" /></div>
+              <div className="relative aspect-[4/3] bg-[#e8e1d4]"><img src={getPublicImageUrl(image.url)} alt={image.alt} className="h-full w-full object-cover" /></div>
               <div className="space-y-2 p-3">
                 <Field label="Légende" value={image.caption} onChange={(value) => setContent((current) => ({ ...current, gallery: { ...current.gallery, images: current.gallery.images.map((item, itemIndex) => itemIndex === index ? { ...item, caption: value } : item) } }))} />
                 <Field label="Texte alternatif" value={image.alt} onChange={(value) => setContent((current) => ({ ...current, gallery: { ...current.gallery, images: current.gallery.images.map((item, itemIndex) => itemIndex === index ? { ...item, alt: value } : item) } }))} />
