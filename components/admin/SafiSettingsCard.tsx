@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { Trash2, Upload, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
@@ -27,6 +27,7 @@ export default function SafiSettingsCard({
   initialSettings: SafiSettings;
   className?: string;
 }) {
+  const router = useRouter();
   const [title, setTitle] = useState(initialSettings.title);
   const [description, setDescription] = useState(initialSettings.description);
   const [buttonText, setButtonText] = useState(initialSettings.buttonText);
@@ -83,6 +84,7 @@ export default function SafiSettingsCard({
     startSaving(async () => {
       try {
         await updateSafiSettings(formData);
+        router.refresh();
         toast.success("La présentation et la galerie Safi ont été enregistrées.");
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Impossible d'enregistrer les modifications.");
@@ -111,7 +113,7 @@ export default function SafiSettingsCard({
           </div>
           <div className="grid overflow-hidden rounded-xl bg-white shadow-sm md:grid-cols-2">
             <div className="relative min-h-64 bg-[#e8e1d4] md:min-h-80">
-              <Image src={images[0] || fallbackImage} alt="Aperçu de la galerie Safi" fill sizes="(max-width: 768px) 92vw, 35vw" className="object-cover" />
+              <img src={images[0] || fallbackImage} alt="Aperçu de la galerie Safi" className="absolute inset-0 h-full w-full object-cover" />
               {images.length > 1 && <span className="absolute bottom-3 right-3 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-bold text-white">+{images.length - 1} photos</span>}
             </div>
             <div className="p-6 sm:p-8">
@@ -170,7 +172,7 @@ export default function SafiSettingsCard({
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {images.map((url) => (
               <div key={url} className="group relative overflow-hidden rounded-lg border border-[#ded8cc] bg-[#f7f2e8]">
-                <Image src={url} alt="Photo de Safi" width={320} height={220} className="aspect-[4/3] w-full object-cover" />
+                <img src={url} alt="Photo de Safi" className="aspect-[4/3] w-full object-cover" />
                 <button
                   type="button"
                   aria-label="Supprimer cette photo"
