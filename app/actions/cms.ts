@@ -195,7 +195,7 @@ export async function updateMenuCategory(id: string, formData: FormData): Promis
   revalidatePath("/admin/menu");
 }
 
-export async function deleteMenuCategory(id: string, _formData?: FormData): Promise<void> {
+export async function deleteMenuCategory(id: string): Promise<void> {
   await assertAdmin();
   const { error: itemsError } = await supabase
     .from("menu_items")
@@ -300,7 +300,7 @@ export async function updateMenuItem(id: string, formData: FormData): Promise<vo
   revalidatePath("/admin/menu");
 }
 
-export async function deleteMenuItem(id: string, _formData?: FormData): Promise<void> {
+export async function deleteMenuItem(id: string): Promise<void> {
   await assertAdmin();
   const { error } = await supabase.from("menu_items").delete().eq("id", id);
   if (error) throw new Error(error.message);
@@ -308,7 +308,7 @@ export async function deleteMenuItem(id: string, _formData?: FormData): Promise<
   revalidatePath("/admin/menu");
 }
 
-export async function toggleMenuItemAvailability(id: string, isAvailable: boolean, _formData?: FormData): Promise<void> {
+export async function toggleMenuItemAvailability(id: string, isAvailable: boolean): Promise<void> {
   await assertAdmin();
   const { error } = await supabase
     .from("menu_items")

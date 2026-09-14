@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { ChevronDown, ChevronUp, ImagePlus, Loader2, Plus, Save, Trash2, Upload } from "lucide-react";
@@ -5,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { deleteSafiImage, updateSafiPageContent, uploadSafiImage } from "@/app/actions/cms";
-import type { SafiContent, SafiFact, SafiGalleryImage, SafiTimelineItem } from "@/lib/safi";
+import type { SafiContent, SafiFact, SafiTimelineItem } from "@/lib/safi";
 import { getPublicImageUrl } from "@/lib/utils/image";
 
 export default function SafiPageManager({ initialContent }: { initialContent: SafiContent }) {

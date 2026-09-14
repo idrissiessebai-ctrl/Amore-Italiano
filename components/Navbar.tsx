@@ -17,13 +17,11 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [visible, setVisible] = useState(false);
+  const isVisible = pathname !== "/" || visible;
   const sectionHref = (href: string) => (href.startsWith("#") && pathname !== "/" ? `/${href}` : href);
 
   useEffect(() => {
-    if (pathname !== "/") {
-      setVisible(true);
-      return;
-    }
+    if (pathname !== "/") return;
 
     const updateVisibility = () => {
       const scrollThreshold = window.innerHeight * 0.8;
@@ -54,7 +52,7 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed left-0 top-0 z-50 flex w-full items-center gap-3 border-b px-[3%] py-3 transition-all duration-300 md:gap-7 md:px-[4%] ${
-        pathname === "/" && !visible
+        !isVisible
           ? "pointer-events-none -translate-y-full opacity-0"
           : "pointer-events-auto translate-y-0 opacity-100"
       } ${

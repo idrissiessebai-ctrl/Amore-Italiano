@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { Trash2, Upload, Loader2 } from "lucide-react";
