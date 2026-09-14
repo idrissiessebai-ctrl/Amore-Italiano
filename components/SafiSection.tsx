@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { getSafiContent } from "@/lib/safi-server";
-import { getPublicImageUrl } from "@/lib/utils/image";
 
 const cardStyles = ["-rotate-3", "rotate-3", "-rotate-2", "rotate-2"];
 const cardLabels = ["Le port", "La médina", "La poterie", "L'Atlantique"];
@@ -12,6 +11,17 @@ const fallbackImages = [
   "/images/amore-24-jpg.webp",
   "/images/amore-25-jpg.webp",
 ];
+
+function publicSafiImageUrl(image: string) {
+  if (image.startsWith("http://") || image.startsWith("https://") || image.startsWith("/")) {
+    return image;
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  return supabaseUrl
+    ? `${supabaseUrl}/storage/v1/object/public/menu-images/${image.replace(/^\/+/, "")}`
+    : image;
+}
 
 export async function SafiSection() {
   const [{ data }, safiContent] = await Promise.all([
@@ -30,7 +40,7 @@ export async function SafiSection() {
   }
 
   const configuredImages = safiContent.gallery.images.map((image) => image.url);
-  const images = Array.from({ length: 4 }, (_, index) => getPublicImageUrl(configuredImages[index] || fallbackImages[index]));
+  const images = Array.from({ length: 4 }, (_, index) => publicSafiImageUrl(configuredImages[index] || fallbackImages[index]));
   const title = value("safi_title", "Une ville authentique.");
   const description = value("safi_description", "Safi possède une identité particulière, entre médina, remparts, ateliers de potiers et océan Atlantique.");
   const buttonText = value("safi_button_text", "DÉCOUVRIR SAFI");
