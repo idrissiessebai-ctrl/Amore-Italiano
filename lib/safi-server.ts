@@ -6,12 +6,34 @@ import { defaultSafiContent, readSafiContent } from "@/lib/safi";
 
 const SAFI_CONTENT_TAG = "safi-page-content";
 
+function safiGalleryImagesFromSettings(settings: { key: string; value: unknown }[]) {
+  const setting = settings.find((item) => item.key === "safi_gallery_images");
+  if (!setting?.value || typeof setting.value !== "object" || !("value" in setting.value)) return [];
+
+  const value = setting.value.value;
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    if (typeof item.url !== "string" || !item.url.trim()) return [];
+
+    return [{
+      url: item.url.trim(),
+      alt: typeof item.alt === "string" && item.alt.trim() ? item.alt.trim() : "Photo de Safi",
+      caption: typeof item.caption === "string" && item.caption.trim() ? item.caption.trim() : "Safi",
+    }];
+  });
+}
+
 const loadSafiContent = unstable_cache(
   async () => {
     try {
       const { data, error } = await supabase.from("restaurant_settings").select("key, value");
       if (error) throw error;
-      return readSafiContent((data ?? []) as { key: string; value: unknown }[]);
+      const settings = (data ?? []) as { key: string; value: unknown }[];
+      const content = readSafiContent(settings);
+      const galleryImages = safiGalleryImagesFromSettings(settings);
+      return galleryImages.length > 0 ? { ...content, gallery: { ...content.gallery, images: galleryImages } } : content;
     } catch (error) {
       console.error("[Safi] Unable to load CMS content; using defaults.", error);
       return defaultSafiContent;

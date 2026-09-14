@@ -8,7 +8,7 @@ import type { SafiContent } from "@/lib/safi";
 import { getPublicImageUrl } from "@/lib/utils/image";
 
 export default function SafiGallery({ content }: { content: SafiContent["gallery"] }) {
-  const photos = content.images;
+  const photos = content.images.map((photo) => ({ ...photo, url: getPublicImageUrl(photo.url) }));
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const selectedPhoto = selectedIndex === null ? null : photos[selectedIndex];
 
@@ -57,7 +57,7 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
               aria-label={`Agrandir : ${photo.alt}`}
             >
               <Image
-                src={getPublicImageUrl(photo.url)}
+                src={photo.url}
                 alt={photo.alt}
                 fill
                 sizes="(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 40vw"
@@ -130,7 +130,7 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
                 className="relative flex h-[85vh] w-[90vw] max-h-[85vh] max-w-[90vw] items-center justify-center"
               >
             <Image
-              src={getPublicImageUrl(selectedPhoto.url)}
+              src={selectedPhoto.url}
               alt={selectedPhoto.alt}
               fill
               sizes="100vw"
