@@ -30,10 +30,34 @@ const loadSafiContent = unstable_cache(
     try {
       const { data, error } = await supabase.from("restaurant_settings").select("key, value");
       if (error) throw error;
+      
       const settings = (data ?? []) as { key: string; value: unknown }[];
       const content = readSafiContent(settings);
-      const galleryImages = safiGalleryImagesFromSettings(settings);
-      return galleryImages.length > 0 ? { ...content, gallery: { ...content.gallery, images: galleryImages } } : content;
+      let galleryImages = safiGalleryImagesFromSettings(settings);
+
+      if (galleryImages.length === 0) {
+        const { data: files, error: storageError } = await supabase.storage
+          .from("public-assets")
+          .list("safi", {
+            limit: 20,
+            sortBy: { column: "created_at", order: "desc" },
+          });
+
+        if (!storageError && files) {
+          galleryImages = files
+            .filter((file) => file.name !== ".emptyFolderPlaceholder" && !file.name.startsWith("."))
+            .map((file) => ({
+              url: `safi/${file.name}`,
+              alt: "Galerie Safi",
+              caption: "Safi",
+            }));
+        }
+      }
+
+      return galleryImages.length > 0 
+        ? { ...content, gallery: { ...content.gallery, images: galleryImages } } 
+        : content;
+        
     } catch (error) {
       console.error("[Safi] Unable to load CMS content; using defaults.", error);
       return defaultSafiContent;
