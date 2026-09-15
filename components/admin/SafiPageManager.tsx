@@ -103,32 +103,38 @@ export default function SafiPageManager({ initialContent }: { initialContent: Sa
   }
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData();
-    formData.set("safi_hero_eyebrow", content.hero.eyebrow);
-    formData.set("safi_hero_title", content.hero.title);
-    formData.set("safi_hero_description", content.hero.description);
-    formData.set("safi_hero_image", getPublicImageUrl(content.hero.image));
-    formData.set("safi_hero_image_alt", content.hero.alt);
-    formData.set("safi_history_eyebrow", content.history.eyebrow);
-    formData.set("safi_history_title", content.history.title);
-    formData.set("safi_history_description", content.history.description);
-    formData.set("safi_history_timeline", JSON.stringify(content.history.timeline));
-    formData.set("safi_patrimoine_eyebrow", content.patrimoine.eyebrow);
-    formData.set("safi_patrimoine_title", content.patrimoine.title);
-    formData.set("safi_patrimoine_description", content.patrimoine.description);
-    formData.set("safi_patrimoine_facts", JSON.stringify(content.patrimoine.facts));
-    formData.set("safi_savoir_eyebrow", content.savoirFaire.eyebrow);
-    formData.set("safi_savoir_title", content.savoirFaire.title);
-    formData.set("safi_savoir_description", content.savoirFaire.description);
-    formData.set("safi_savoir_facts", JSON.stringify(content.savoirFaire.facts));
-    formData.set("safi_gallery_eyebrow", content.gallery.eyebrow);
-    formData.set("safi_gallery_title", content.gallery.title);
-    formData.set("safi_gallery_description", content.gallery.description);
-    formData.set(
-      "safi_gallery_images",
-      JSON.stringify(content.gallery.images.map((image) => ({ ...image, url: getPublicImageUrl(image.url) }))),
-    );
+  event.preventDefault();
+  const formData = new FormData();
+  formData.set("safi_hero_eyebrow", content.hero.eyebrow);
+  formData.set("safi_hero_title", content.hero.title);
+  formData.set("safi_hero_description", content.hero.description);
+  
+  formData.set("safi_hero_image", content.hero.image);
+  formData.set("safi_hero_image_alt", content.hero.alt);
+  
+  formData.set("safi_history_eyebrow", content.history.eyebrow);
+  formData.set("safi_history_title", content.history.title);
+  formData.set("safi_history_description", content.history.description);
+  formData.set("safi_history_timeline", JSON.stringify(content.history.timeline));
+  
+  formData.set("safi_patrimoine_eyebrow", content.patrimoine.eyebrow);
+  formData.set("safi_patrimoine_title", content.patrimoine.title);
+  formData.set("safi_patrimoine_description", content.patrimoine.description);
+  formData.set("safi_patrimoine_facts", JSON.stringify(content.patrimoine.facts));
+  
+  formData.set("safi_savoir_eyebrow", content.savoirFaire.eyebrow);
+  formData.set("safi_savoir_title", content.savoirFaire.title);
+  formData.set("safi_savoir_description", content.savoirFaire.description);
+  formData.set("safi_savoir_facts", JSON.stringify(content.savoirFaire.facts));
+  
+  formData.set("safi_gallery_eyebrow", content.gallery.eyebrow);
+  formData.set("safi_gallery_title", content.gallery.title);
+  formData.set("safi_gallery_description", content.gallery.description);
+  
+  formData.set(
+    "safi_gallery_images",
+    JSON.stringify(content.gallery.images),
+  );
 
     startSaving(async () => {
       try {

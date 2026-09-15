@@ -23,16 +23,6 @@ function getSettingValue(settings: Setting[], key: string, fallback = "") {
   return typeof setting.value.value === "string" ? setting.value.value : fallback;
 }
 
-function getSafiImages(settings: Setting[]) {
-  const setting = settings.find((item) => item.key === "safi_images");
-  if (!setting?.value || typeof setting.value !== "object" || !("value" in setting.value)) {
-    return [];
-  }
-  return Array.isArray(setting.value.value)
-    ? setting.value.value.filter((image): image is string => typeof image === "string")
-    : [];
-}
-
 export default async function AdminSettingsPage() {
   await assertAdmin();
   const { data: settingsData } = await supabase.from("restaurant_settings").select("key, value");
@@ -63,17 +53,6 @@ export default async function AdminSettingsPage() {
             <button className="mt-5 w-full rounded-full bg-[#a92e27] px-5 py-3 text-sm font-bold !text-white transition hover:bg-[#8f241f]">ENREGISTRER</button>
           </form>
         ))}
-
-        <SafiSettingsCard
-          className="lg:col-span-3"
-          initialSettings={{
-            title: getSettingValue(settings, "safi_title", "Safi, notre ville de cœur."),
-            description: getSettingValue(settings, "safi_description"),
-            buttonText: getSettingValue(settings, "safi_button_text", "Découvrir Safi"),
-            buttonLink: getSettingValue(settings, "safi_button_link", "/safi"),
-            images: getSafiImages(settings),
-          }}
-        />
       </div>
     </section>
   );
