@@ -4,7 +4,7 @@ import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, ZoomControl, useMap } from "react-leaflet";
 import { useEffect, useMemo } from "react";
 
-const SAFI_COORDINATES: [number, number] = [32.2994, -9.2372];
+const SAFI_COORDINATES: [number, number] = [32.29309068599349, -9.234853959756705];
 
 function MapSizeController() {
   const map = useMap();

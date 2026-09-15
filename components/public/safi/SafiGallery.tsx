@@ -59,6 +59,7 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
               <Image
                 src={photo.url}
                 alt={photo.alt}
+                unoptimized
                 fill
                 sizes="(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 40vw"
                 className="object-cover transition duration-500 group-hover:scale-105"
@@ -132,6 +133,7 @@ export default function SafiGallery({ content }: { content: SafiContent["gallery
             <Image
               src={selectedPhoto.url}
               alt={selectedPhoto.alt}
+              unoptimized
               fill
               sizes="100vw"
               className="max-h-[85vh] max-w-[90vw] object-contain"
