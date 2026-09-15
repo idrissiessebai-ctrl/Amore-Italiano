@@ -55,10 +55,10 @@ function hasValidImageSignature(buffer: Buffer, type: string) {
 }
 
 async function ensureMenuImagesBucket() {
-  const { data: bucket } = await supabase.storage.getBucket("menu-images");
+  const { data: bucket } = await supabase.storage.getBucket("public-assets");
   if (bucket) return null;
 
-  const { error } = await supabase.storage.createBucket("menu-images", {
+  const { error } = await supabase.storage.createBucket("public-assets", {
     public: true,
   });
   if (error && !error.message.toLowerCase().includes("already exists")) return error;
@@ -87,14 +87,14 @@ async function uploadImage(formData: FormData, folder: string) {
 
   const bucketError = await ensureMenuImagesBucket();
   if (bucketError) {
-    console.error("[CMS] Unable to initialize menu-images bucket:", bucketError);
+    console.error("[CMS] Unable to initialize public-assets bucket:", bucketError);
     return { error: "Le stockage des images est indisponible." };
   }
 
   const extension = file.type.split("/")[1].replace("jpeg", "jpg");
   const path = `${folder}/${new Date().toISOString().slice(0, 10)}/${randomUUID()}.${extension}`;
   const { error: uploadError } = await supabase.storage
-    .from("menu-images")
+    .from("public-assets")
     .upload(path, buffer, { contentType: file.type, upsert: false });
 
   if (uploadError) {
@@ -102,7 +102,7 @@ async function uploadImage(formData: FormData, folder: string) {
     return { error: "Impossible d'enregistrer l'image." };
   }
 
-  const { data } = supabase.storage.from("menu-images").getPublicUrl(path);
+  const { data } = supabase.storage.from("public-assets").getPublicUrl(path);
   return { success: true, url: data.publicUrl };
 }
 
@@ -128,7 +128,7 @@ function safiStoragePath(url: string) {
   }
   if (parsedUrl.origin !== configuredOrigin) return null;
 
-  const marker = "/storage/v1/object/public/menu-images/";
+  const marker = "/storage/v1/object/public/public-assets/";
   if (!parsedUrl.pathname.startsWith(marker)) return null;
   const path = decodeURIComponent(parsedUrl.pathname.slice(marker.length));
   return path.startsWith("safi/") ? path : null;
@@ -153,7 +153,7 @@ export async function deleteSafiImage(url: string) {
   const isReferencedByMenu = (menuItems ?? []).some((item) => item.image_url === url);
   if (isReferencedBySettings || isReferencedByMenu) return;
 
-  const { error } = await supabase.storage.from("menu-images").remove([path]);
+  const { error } = await supabase.storage.from("public-assets").remove([path]);
   if (error) throw new Error("Impossible de supprimer cette image.");
 }
 
