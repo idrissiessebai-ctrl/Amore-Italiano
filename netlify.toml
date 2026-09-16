@@ -1,3 +1,15 @@
+[[redirects]]
+  from = "/ingest/static/*"
+  to = "https://eu-assets.i.posthog.com/static/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/ingest/*"
+  to = "https://eu.i.posthog.com/:splat"
+  status = 200
+  force = true
+
 [build.environment]
   # These values are intentionally public and are emitted into the homepage.
   SECRETS_SCAN_OMIT_KEYS = "SUPABASE_URL,NEXT_PUBLIC_HERO_VIDEO_URL,NEXT_PUBLIC_POSTHOG_HOST"
