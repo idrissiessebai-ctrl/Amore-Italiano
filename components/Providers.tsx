@@ -23,6 +23,7 @@ export default function Providers({
         api_host: "/ingest",
         asset_host: "/ingest",
         ui_host: "https://eu.posthog.com",
+        disable_compression: true,
         capture_pageview: false,
         capture_pageleave: true,
         disable_session_recording: false,
