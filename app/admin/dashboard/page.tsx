@@ -34,6 +34,7 @@ export default async function AdminDashboardPage() {
     .map((result) => result.warning)
     .filter((warning, index, all): warning is string => Boolean(warning) && all.indexOf(warning) === index);
 
+  console.log({ overview, visitors, recordings, topPages })
   return (
     <section className="mx-auto w-[92%] max-w-[1180px] py-16">
       <p className="text-xs font-bold uppercase tracking-[.2em] text-[#a92e27]">
