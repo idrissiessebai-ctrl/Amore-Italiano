@@ -52,18 +52,20 @@ export type AnalyticsStats = OverviewMetrics & {
 };
 
 function getConfig() {
+  const host = (
+    process.env.NEXT_PUBLIC_POSTHOG_HOST ||
+    process.env.PUBLIC_POSTHOG_HOST ||
+    process.env.POSTHOG_API_HOST ||
+    "https://eu.posthog.com"
+  ).replace(/\/$/, "");
+
   return {
     apiKey: process.env.POSTHOG_PERSONAL_API_KEY,
     projectId:
       process.env.NEXT_PUBLIC_POSTHOG_PROJECT_ID ||
       process.env.PUBLIC_POSTHOG_PROJECT_ID ||
       process.env.POSTHOG_PROJECT_ID,
-    host: (
-      process.env.NEXT_PUBLIC_POSTHOG_HOST ||
-      process.env.PUBLIC_POSTHOG_HOST ||
-      process.env.POSTHOG_API_HOST ||
-      ""
-    ).replace(/\/$/, ""),
+    host,
   };
 }
 
@@ -125,16 +127,13 @@ export async function getOverviewMetrics(): Promise<AnalyticsResult<OverviewMetr
   };
 
   try {
-    const [result] = await runHogQL<{
-      visitors: number;
-      pageviews: number;
-      average_session_duration: number;
-      bounce_rate: number;
-    }>(`
+    const [result] = await runHogQL<[number, number, number, number,]>(`
       WITH session_stats AS (
         SELECT
           properties.$session_id AS session_id,
-          countIf(event = '$pageview') AS pageviews,
+          any(distinct_id) AS distinct_id,
+          countIf(event = '$pageview') AS pvs,
+          count() AS total_events,
           dateDiff('second', min(timestamp), max(timestamp)) AS duration
         FROM events
         WHERE timestamp >= now() - INTERVAL ${WINDOW}
@@ -142,22 +141,23 @@ export async function getOverviewMetrics(): Promise<AnalyticsResult<OverviewMetr
         GROUP BY session_id
       )
       SELECT
-        count(DISTINCT if(event = '$pageview', person_id, NULL)) AS visitors,
-        countIf(event = '$pageview') AS pageviews,
-        (SELECT avg(duration) FROM session_stats WHERE pageviews > 0) AS average_session_duration,
-        (SELECT avg(if(pageviews = 1, 1, 0)) * 100 FROM session_stats WHERE pageviews > 0) AS bounce_rate
-      FROM events
-      WHERE timestamp >= now() - INTERVAL ${WINDOW}
+        count(DISTINCT distinct_id) AS visitors,
+        sum(pvs) AS pageviews,
+        coalesce(round(avgIf(duration, total_events > 1)), 0) AS average_session_duration,
+        coalesce(round(avg(if(total_events <= 1, 1, 0)) * 100), 0) AS bounce_rate
+      FROM session_stats
     `);
 
     if (!result) return unavailable(empty);
 
+    const [visitors, pageviews, averageSessionDuration, bounceRate] = result;
+
     return {
       data: {
-        visitors: Number(result.visitors) || 0,
-        pageviews: Number(result.pageviews) || 0,
-        averageSessionDuration: Number(result.average_session_duration) || 0,
-        bounceRate: Number(result.bounce_rate) || 0,
+        visitors: Number(visitors) || 0,
+        pageviews: Number(pageviews) || 0,
+        averageSessionDuration: Number(averageSessionDuration) || 0,
+        bounceRate: Number(bounceRate) || 0,
       },
     };
   } catch (error) {
@@ -165,13 +165,6 @@ export async function getOverviewMetrics(): Promise<AnalyticsResult<OverviewMetr
     return unavailable(empty);
   }
 }
-
-type PersonApiRecord = {
-  id: string;
-  distinct_ids?: string[];
-  properties?: Record<string, unknown>;
-  last_seen_at?: string | null;
-};
 
 function property(properties: Record<string, unknown> | undefined, keys: string[]) {
   for (const key of keys) {
@@ -184,19 +177,30 @@ function property(properties: Record<string, unknown> | undefined, keys: string[
 export async function getRecentVisitors(): Promise<AnalyticsResult<VisitorProfile[]>> {
   await assertAdmin();
   try {
-    const { projectId } = getConfig();
-    const payload = await posthogFetch<ApiPayload<PersonApiRecord>>(
-      `/api/projects/${projectId}/persons/?limit=10&ordering=-last_seen_at`,
-    );
+    const rows = await runHogQL<[string, string, string, string, string]>(`
+      SELECT
+        distinct_id,
+        any(coalesce(properties.$geoip_country_name, properties.$initial_geoip_country_name, '—')) AS country,
+        any(coalesce(properties.$browser, properties.$initial_browser, '—')) AS browser,
+        any(coalesce(properties.$device_type, properties.$os, properties.$initial_os, '—')) AS device,
+        max(timestamp) AS last_seen
+      FROM events
+      WHERE timestamp >= now() - INTERVAL ${WINDOW}
+      GROUP BY distinct_id
+      ORDER BY last_seen DESC
+      LIMIT 10
+    `);
 
+    console.log("DEBUG VISITORS ROWS:", rows);
+    
     return {
-      data: (payload.results ?? []).map((person) => ({
-        id: person.id,
-        distinctId: person.distinct_ids?.[0],
-        country: property(person.properties, ["$geoip_country_name", "$geoip_country_code"]),
-        browser: property(person.properties, ["$browser"]),
-        device: property(person.properties, ["$device_type", "$os"]),
-        lastSeenAt: person.last_seen_at ?? null,
+      data: rows.map(([distinctId, country, browser, device, lastSeen]) => ({
+        id: distinctId,
+        distinctId,
+        country: country || "—",
+        browser: browser || "—",
+        device: device || "—",
+        lastSeenAt: lastSeen || null,
       })),
     };
   } catch (error) {
@@ -218,20 +222,42 @@ type RecordingApiRecord = {
 export async function getSessionRecordings(): Promise<AnalyticsResult<SessionRecording[]>> {
   await assertAdmin();
   try {
-    const { projectId } = getConfig();
+    const { projectId, host } = getConfig();
     const payload = await posthogFetch<ApiPayload<RecordingApiRecord>>(
       `/api/projects/${projectId}/session_recordings/?limit=10`,
     );
 
     const recordings = (payload.results ?? []).map((recording) => {
-      const properties = recording.person?.properties ?? recording.properties;
+      const properties = recording.person?.properties ?? recording.properties ?? {};
+
+      const rawLocation = property(properties, [
+        "$geoip_city_name",
+        "$geoip_country_name",
+        "$initial_geoip_city_name",
+        "$initial_geoip_country_name",
+      ]);
+
+      const location =
+        rawLocation !== "—"
+          ? rawLocation
+          : `Visiteur (${recording.distinct_id?.slice(0, 8) || "Anonyme"})`;
+
+      const rawDevice = property(properties, [
+        "$device_type",
+        "$browser",
+        "$os",
+        "$initial_browser",
+        "$initial_os",
+      ]);
+      const device = rawDevice !== "—" ? rawDevice : "Session Web";
+
       return {
         id: recording.id,
         duration: Number(recording.duration ?? recording.recording_duration) || 0,
         startTime: recording.start_time ?? null,
-        location: property(properties, ["$geoip_city_name", "$geoip_country_name"]),
-        device: property(properties, ["$device_type", "$browser", "$os"]),
-        replayUrl: `${getConfig().host}/project/${projectId}/replay/${recording.id}`,
+        location,
+        device,
+        replayUrl: `${host}/project/${projectId}/replay/${recording.id}`,
       };
     });
 
@@ -251,9 +277,9 @@ export async function getSessionRecordings(): Promise<AnalyticsResult<SessionRec
 export async function getTopPages(): Promise<AnalyticsResult<TopPage[]>> {
   await assertAdmin();
   try {
-    const rows = await runHogQL<{ path: string; views: number }>(`
+    const rows = await runHogQL<[string, number]>(`
       SELECT
-        coalesce(properties.$pathname, properties.$current_url, '/') AS path,
+        coalesce(nullIf(properties.$pathname, ''), nullIf(properties.$current_url, ''), '/') AS path,
         count() AS views
       FROM events
       WHERE event = '$pageview'
@@ -264,9 +290,9 @@ export async function getTopPages(): Promise<AnalyticsResult<TopPage[]>> {
     `);
 
     return {
-      data: rows.map((row) => ({
-        path: row.path || "/",
-        views: Number(row.views) || 0,
+      data: rows.map(([path, views]) => ({
+        path: path || "/",
+        views: Number(views) || 0,
       })),
     };
   } catch (error) {
