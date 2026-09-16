@@ -1,6 +1,6 @@
 import type { OverviewMetrics } from "@/app/actions/analytics";
 
-function formatDuration(seconds: number) {
+function formatDuration(seconds?: number) {
   if (!seconds) return "—";
   const minutes = Math.floor(seconds / 60);
   const remaining = Math.round(seconds % 60);
@@ -10,13 +10,13 @@ function formatDuration(seconds: number) {
 export default function AnalyticsOverviewCards({
   metrics,
 }: {
-  metrics: OverviewMetrics;
+  metrics?: OverviewMetrics;
 }) {
   const cards = [
-    ["Visiteurs", metrics.visitors.toLocaleString("fr-FR")],
-    ["Pages vues", metrics.pageviews.toLocaleString("fr-FR")],
-    ["Durée moyenne", formatDuration(metrics.averageSessionDuration)],
-    ["Taux de rebond", `${Math.round(metrics.bounceRate)}%`],
+    ["Visiteurs", (metrics?.visitors ?? 0).toLocaleString("fr-FR")],
+    ["Pages vues", (metrics?.pageviews ?? 0).toLocaleString("fr-FR")],
+    ["Durée moyenne", formatDuration(metrics?.averageSessionDuration)],
+    ["Taux de rebond", `${Math.round(metrics?.bounceRate ?? 0)}%`],
   ];
 
   return (
@@ -30,4 +30,3 @@ export default function AnalyticsOverviewCards({
     </div>
   );
 }
-
