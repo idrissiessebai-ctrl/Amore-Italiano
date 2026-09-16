@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
+import PaginatedTableCard from "@/components/PaginatedTableCard";
 
 export type ApplicationStatus = "pending" | "reviewed" | "rejected";
 
@@ -126,8 +127,9 @@ export default function ApplicationsTable({
   }
 
   return (
-    <div className="mt-10 overflow-hidden rounded-2xl border border-[#ded8cc] bg-white shadow-[0_18px_50px_rgba(23,23,23,.06)]">
-      <div className="border-b border-[#ded8cc] bg-[#fffaf2] p-5 md:p-6">
+    <div className="mt-10 space-y-4">
+      {/* Search & Status Filters Header */}
+      <div className="rounded-2xl border border-[#ded8cc] bg-[#fffaf2] p-5 md:p-6 shadow-sm">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative w-full max-w-md">
             <Search
@@ -147,6 +149,7 @@ export default function ApplicationsTable({
             {filteredApplications.length} Candidature{filteredApplications.length === 1 ? "" : "s"}
           </span>
         </div>
+        
         <div className="mt-5 flex flex-wrap gap-2" role="tablist" aria-label="Filtrer par statut">
           <button
             type="button"
@@ -172,98 +175,96 @@ export default function ApplicationsTable({
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[880px] text-left text-sm">
-          <thead className="border-b border-[#ded8cc] bg-[#f7f2e8]/60 text-[11px] uppercase tracking-[.14em] text-[#6e6a61]">
-            <tr>
-              <th className="px-6 py-4 font-bold">Date</th>
-              <th className="px-6 py-4 font-bold">Candidat</th>
-              <th className="px-6 py-4 font-bold">Poste</th>
-              <th className="px-6 py-4 font-bold">Téléphone</th>
-              <th className="px-6 py-4 font-bold">Statut</th>
-              <th className="px-6 py-4 font-bold">CV</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredApplications.map((application) => (
-              <tr
-                key={application.id}
-                className="border-b border-[#ded8cc] transition-colors last:border-0 hover:bg-neutral-100/50"
-              >
-                <td className="whitespace-nowrap px-6 py-5 text-xs text-[#6e6a61]">
-                  {formatDate(application.created_at)}
-                </td>
-                <td className="px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e8c7a5] text-xs font-bold text-[#596246]">
-                      {getInitials(application)}
-                    </span>
-                    <span className="font-bold text-[#171717]">
-                      {application.prenom} {application.nom}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-5 text-[#4a4741]">{application.poste || "—"}</td>
-                <td className="px-6 py-5">
-                  <div className="flex items-center gap-2 whitespace-nowrap">
-                    <Phone size={14} aria-hidden="true" className="text-[#596246]" />
-                    <a href={`tel:${application.telephone}`} className="text-[#4a4741] hover:text-[#a92e27]">
-                      {application.telephone}
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => copyPhone(application.id, application.telephone)}
-                      className="rounded-md p-1.5 text-[#6e6a61] transition hover:bg-[#f7f2e8] hover:text-[#171717]"
-                      aria-label={`Copier le numéro de ${application.prenom} ${application.nom}`}
-                    >
-                      {copiedId === application.id ? <Check size={14} aria-hidden="true" /> : <Clipboard size={14} aria-hidden="true" />}
-                    </button>
-                  </div>
-                </td>
-                <td className="px-6 py-5">
-                  <div className="relative w-fit">
-                    <select
-                      value={application.status}
-                      onChange={(event) => handleStatusChange(application.id, event.target.value as ApplicationStatus)}
-                      disabled={updatingId === application.id}
-                      aria-label={`Statut de ${application.prenom} ${application.nom}`}
-                      className={`appearance-none rounded-full border py-2 pl-3 pr-8 text-xs font-bold outline-none transition focus:ring-2 focus:ring-[#a92e27]/20 disabled:cursor-wait disabled:opacity-60 ${statusStyles[application.status]}`}
-                    >
-                      {statusOptions.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label}</option>
-                      ))}
-                    </select>
-                    {updatingId === application.id && (
-                      <Loader2 size={13} className="absolute right-2 top-1/2 -translate-y-1/2 animate-spin" aria-label="Mise à jour" />
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-5">
-                  {application.downloadUrl ? (
-                    <a
-                      href={application.downloadUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full border border-[#a92e27]/25 bg-[#a92e27]/5 px-3 py-2 text-xs font-bold text-[#a92e27] transition hover:bg-[#a92e27] hover:!text-white"
-                    >
-                      <FileText size={14} aria-hidden="true" />
-                      Voir CV
-                      <Download size={13} aria-hidden="true" />
-                    </a>
+      {/* Paginated Table Component */}
+      <PaginatedTableCard
+        title="Liste des Candidatures"
+        items={filteredApplications}
+        pageSize={10}
+        headers={["Date", "Candidat", "Poste", "Téléphone", "Statut", "CV"]}
+        renderRow={(application, index) => (
+          <tr
+            key={application.id ?? index}
+            className="border-b border-[#ded8cc] transition-colors last:border-0 hover:bg-neutral-100/50"
+          >
+            <td className="whitespace-nowrap px-6 py-5 text-xs text-[#6e6a61]">
+              {formatDate(application.created_at)}
+            </td>
+            <td className="px-6 py-5">
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e8c7a5] text-xs font-bold text-[#596246]">
+                  {getInitials(application)}
+                </span>
+                <span className="font-bold text-[#171717]">
+                  {application.prenom} {application.nom}
+                </span>
+              </div>
+            </td>
+            <td className="px-6 py-5 text-[#4a4741]">{application.poste || "—"}</td>
+            <td className="px-6 py-5">
+              <div className="flex items-center gap-2 whitespace-nowrap">
+                <Phone size={14} aria-hidden="true" className="text-[#596246]" />
+                <a href={`tel:${application.telephone}`} className="text-[#4a4741] hover:text-[#a92e27]">
+                  {application.telephone}
+                </a>
+                <button
+                  type="button"
+                  onClick={() => copyPhone(application.id, application.telephone)}
+                  className="rounded-md p-1.5 text-[#6e6a61] transition hover:bg-[#f7f2e8] hover:text-[#171717]"
+                  aria-label={`Copier le numéro de ${application.prenom} ${application.nom}`}
+                >
+                  {copiedId === application.id ? (
+                    <Check size={14} aria-hidden="true" />
                   ) : (
-                    <span className="text-xs text-[#6e6a61]">Indisponible</span>
+                    <Clipboard size={14} aria-hidden="true" />
                   )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {!filteredApplications.length && (
-          <p className="p-10 text-center text-sm text-[#6e6a61]">
-            Aucune candidature ne correspond à ces critères.
-          </p>
+                </button>
+              </div>
+            </td>
+            <td className="px-6 py-5">
+              <div className="relative w-fit">
+                <select
+                  value={application.status}
+                  onChange={(event) =>
+                    handleStatusChange(application.id, event.target.value as ApplicationStatus)
+                  }
+                  disabled={updatingId === application.id}
+                  aria-label={`Statut de ${application.prenom} ${application.nom}`}
+                  className={`appearance-none rounded-full border py-2 pl-3 pr-8 text-xs font-bold outline-none transition focus:ring-2 focus:ring-[#a92e27]/20 disabled:cursor-wait disabled:opacity-60 ${statusStyles[application.status]}`}
+                >
+                  {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {updatingId === application.id && (
+                  <Loader2
+                    size={13}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 animate-spin"
+                    aria-label="Mise à jour"
+                  />
+                )}
+              </div>
+            </td>
+            <td className="px-6 py-5">
+              {application.downloadUrl ? (
+                <a
+                  href={application.downloadUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#a92e27]/25 bg-[#a92e27]/5 px-3 py-2 text-xs font-bold text-[#a92e27] transition hover:bg-[#a92e27] hover:!text-white"
+                >
+                  <FileText size={14} aria-hidden="true" />
+                  Voir CV
+                  <Download size={13} aria-hidden="true" />
+                </a>
+              ) : (
+                <span className="text-xs text-[#6e6a61]">Indisponible</span>
+              )}
+            </td>
+          </tr>
         )}
-      </div>
+      />
     </div>
   );
 }

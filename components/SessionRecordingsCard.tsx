@@ -1,4 +1,7 @@
+"use client";
+
 import type { SessionRecording } from "@/app/actions/analytics";
+import PaginatedTableCard from "@/components/PaginatedTableCard";
 
 function formatDuration(seconds: number) {
   if (!seconds) return "—";
@@ -20,41 +23,36 @@ export default function SessionRecordingsCard({
   recordings: SessionRecording[];
 }) {
   return (
-    <section className="rounded-xl bg-white p-6 shadow-sm">
-      <h2 className="serif text-3xl">Enregistrements récents</h2>
-      {!recordings.length ? (
-        <p className="mt-5 text-sm text-[#4a4741]">Aucun enregistrement récent.</p>
-      ) : (
-        <div className="mt-5 space-y-3">
-          {recordings.map((recording) => (
-            <div
-              key={recording.id}
-              className="flex flex-wrap items-center justify-between gap-4 rounded-lg bg-[#f7f2e8] p-4"
+    <PaginatedTableCard
+      title="Enregistrements récents"
+      items={recordings}
+      pageSize={5}
+      headers={["Emplacement", "Appareil & Date", "Durée", "Action"]}
+      renderRow={(recording, index) => (
+        <tr key={recording.id ?? index} className="hover:bg-gray-50/50">
+          <td className="py-3 font-semibold text-[#1a1a1a]">
+            {recording.location || "Inconnu"}
+          </td>
+          <td className="py-3 text-sm text-[#4a4741]">
+            {recording.device} · {formatDate(recording.startTime)}
+          </td>
+          <td className="py-3">
+            <span className="inline-block rounded-full bg-[#596246] px-3 py-1 text-xs font-bold !text-white">
+              {formatDuration(recording.duration)}
+            </span>
+          </td>
+          <td className="py-3">
+            <a
+              href={recording.replayUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-bold text-[#a92e27] hover:underline"
             >
-              <div>
-                <p className="font-semibold">{recording.location}</p>
-                <p className="text-sm text-[#4a4741]">
-                  {recording.device} · {formatDate(recording.startTime)}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="rounded-full bg-[#596246] px-3 py-1 text-xs font-bold !text-white">
-                  {formatDuration(recording.duration)}
-                </span>
-                <a
-                  href={recording.replayUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs font-bold text-[#a92e27]"
-                >
-                  OUVRIR DANS POSTHOG ↗
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
+              OUVRIR DANS POSTHOG ↗
+            </a>
+          </td>
+        </tr>
       )}
-    </section>
+    />
   );
 }
-
