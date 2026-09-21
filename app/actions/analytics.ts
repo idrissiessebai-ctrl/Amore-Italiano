@@ -83,7 +83,6 @@ async function posthogFetch<T>(path: string, init?: RequestInit): Promise<T> {
     const error = new Error(
       "PostHog configuration is missing. Set the API key, project ID, and host.",
     );
-    console.error("[PostHog] Missing API key or project ID:", error.message);
     throw error;
   }
 
@@ -99,9 +98,6 @@ async function posthogFetch<T>(path: string, init?: RequestInit): Promise<T> {
 
   if (!response.ok) {
     const message = await response.text();
-    console.error(
-      `[PostHog] Request failed with ${response.status} ${response.statusText}: ${message}`,
-    );
     throw new Error(`PostHog request failed with ${response.status}.`);
   }
 
@@ -161,7 +157,6 @@ export async function getOverviewMetrics(): Promise<AnalyticsResult<OverviewMetr
       },
     };
   } catch (error) {
-    console.error("[PostHog] Overview metrics request failed:", error);
     return unavailable(empty);
   }
 }
@@ -191,7 +186,6 @@ export async function getRecentVisitors(): Promise<AnalyticsResult<VisitorProfil
       LIMIT 10
     `);
 
-    console.log("DEBUG VISITORS ROWS:", rows);
     
     return {
       data: rows.map(([distinctId, country, browser, device, lastSeen]) => ({
@@ -204,7 +198,6 @@ export async function getRecentVisitors(): Promise<AnalyticsResult<VisitorProfil
       })),
     };
   } catch (error) {
-    console.error("[PostHog] Recent visitors request failed:", error);
     return unavailable([]);
   }
 }
@@ -269,7 +262,6 @@ export async function getSessionRecordings(): Promise<AnalyticsResult<SessionRec
       data: recordings,
     };
   } catch (error) {
-    console.error("[PostHog] Session recordings request failed:", error);
     return unavailable([]);
   }
 }
@@ -296,7 +288,6 @@ export async function getTopPages(): Promise<AnalyticsResult<TopPage[]>> {
       })),
     };
   } catch (error) {
-    console.error("[PostHog] Top pages request failed:", error);
     return unavailable([]);
   }
 }
@@ -343,7 +334,6 @@ async function runConversionQuery(): Promise<AnalyticsResult<Pick<AnalyticsStats
       },
     };
   } catch (error) {
-    console.error("[PostHog] Conversion metrics request failed:", error);
     return unavailable(empty);
   }
 }

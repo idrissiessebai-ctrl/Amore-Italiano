@@ -59,7 +59,6 @@ const loadSafiContent = unstable_cache(
         : content;
         
     } catch (error) {
-      console.error("[Safi] Unable to load CMS content; using defaults.", error);
       return defaultSafiContent;
     }
   },

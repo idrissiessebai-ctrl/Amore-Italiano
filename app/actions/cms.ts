@@ -87,7 +87,6 @@ async function uploadImage(formData: FormData, folder: string) {
 
   const bucketError = await ensureMenuImagesBucket();
   if (bucketError) {
-    console.error("[CMS] Unable to initialize public-assets bucket:", bucketError);
     return { error: "Le stockage des images est indisponible." };
   }
 
@@ -98,7 +97,6 @@ async function uploadImage(formData: FormData, folder: string) {
     .upload(path, buffer, { contentType: file.type, upsert: false });
 
   if (uploadError) {
-    console.error("[CMS] Menu image upload failed:", uploadError);
     return { error: "Impossible d'enregistrer l'image." };
   }
 
@@ -144,7 +142,6 @@ export async function deleteSafiImage(url: string) {
     supabase.from("menu_items").select("image_url"),
   ]);
   if (settingsResult.error || menuItemsResult.error) {
-    console.error("[CMS] Unable to verify Safi image references:", settingsResult.error ?? menuItemsResult.error);
     throw new Error("Impossible de vérifier les références de cette image.");
   }
   const settings = settingsResult.data;
