@@ -19,7 +19,7 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://amoreitaliano-safi.com"),
+  metadataBase: new URL("https://amoreitalianosafi.com"),
   title: {
     default: "Amore Italiano — Safi",
     template: "%s — Amore Italiano Safi",
