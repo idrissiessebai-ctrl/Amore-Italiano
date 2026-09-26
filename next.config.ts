@@ -55,7 +55,7 @@ const nextConfig: NextConfig = {
               "frame-ancestors 'none'",
               "form-action 'self'",
               "script-src 'self' 'unsafe-inline' https://clerk.amoreitalianosafi.com https://*.clerk.accounts.dev https://*.clerk.com https://*.posthog.com blob:",
-              "worker-src 'self' blob:",
+              "worker-src 'self' blob: data:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' https://*.supabase.co https://*.tile.openstreetmap.org https://upload.wikimedia.org https://*.posthog.com https://img.clerk.com https://*.clerk.com data: blob:",
