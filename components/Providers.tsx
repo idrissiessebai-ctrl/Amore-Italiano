@@ -14,8 +14,6 @@ export default function Providers({
   useEffect(() => {
     const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 
-    console.log("PostHog Init Key:", key ? "EXISTS" : "MISSING");
-
     if (!key) return;
 
     if (!posthog.__loaded) {
